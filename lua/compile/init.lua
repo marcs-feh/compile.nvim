@@ -24,7 +24,7 @@ local function keymap (mode, seq, cmd)
 	vim.keymap.set(mode, seq, cmd, {noremap = true, silent = true})
 end
 
-local function get_compile_cmd(kind)
+function M.get_compile_cmd(kind)
 	local ft = vim.bo.filetype
 
 	local buf_cmd = vim.b['compile_cmd_'..kind]
@@ -64,23 +64,14 @@ end
 local function apply_keymaps()
 	local binds = options.bindings
 	if binds.build then
-		keymap('n', binds.build, function() M.compile(get_compile_cmd('build')) end)
+		keymap('n', binds.build, function() M.compile(M.get_compile_cmd('build')) end)
 	end
 	if binds.run then
-		keymap('n', binds.run, function() M.compile(get_compile_cmd('run')) end)
+		keymap('n', binds.run, function() M.compile(M.get_compile_cmd('run')) end)
 	end
 	if binds.test then
-		keymap('n', binds.test, function() M.compile(get_compile_cmd('test')) end)
+		keymap('n', binds.test, function() M.compile(M.get_compile_cmd('test')) end)
 	end
-end
-
-function M.setup(opts)
-	if type(opts) ~= 'table' then opts = {} end
-	apply_defaults(opts)
-	options = opts
-	apply_keymaps()
-	--- Export
-	Compile = M
 end
 
 local function make_comp_window(cmd)
@@ -96,9 +87,18 @@ function M.compile(cmd)
 			vim.cmd [[wa!]]
 		end
 		make_comp_window(cmd)
+	else
+		api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
 	end
+end
 
-	api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
+function M.setup(opts)
+	if type(opts) ~= 'table' then opts = {} end
+	apply_defaults(opts)
+	options = opts
+	apply_keymaps()
+	--- Export
+	Compile = M
 end
 
 return M
