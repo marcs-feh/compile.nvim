@@ -64,13 +64,13 @@ end
 local function apply_keymaps()
 	local binds = options.bindings
 	if binds.build then
-		keymap('n', binds.build, function() M.compile(0, get_compile_cmd('build')) end)
+		keymap('n', binds.build, function() M.compile(get_compile_cmd('build')) end)
 	end
 	if binds.run then
-		keymap('n', binds.run, function() M.compile(0, get_compile_cmd('run')) end)
+		keymap('n', binds.run, function() M.compile(get_compile_cmd('run')) end)
 	end
 	if binds.test then
-		keymap('n', binds.test, function() M.compile(0, get_compile_cmd('test')) end)
+		keymap('n', binds.test, function() M.compile(get_compile_cmd('test')) end)
 	end
 end
 
@@ -79,27 +79,26 @@ function M.setup(opts)
 	apply_defaults(opts)
 	options = opts
 	apply_keymaps()
+	--- Export
+	Compile = M
 end
 
 local function make_comp_window(cmd)
-	if options.save_on_compile then
-		vim.cmd [[wa!]]
-	end
 	vim.cmd [[topleft split]]
 	vim.cmd(('horizontal resize %d'):format(options.comp_window_height))
 	vim.cmd.terminal(cmd)
 	vim.cmd [[normal i]]
 end
 
-function M.compile(bufnum, cmd)
+function M.compile(cmd)
 	if cmd then
+		if options.save_on_compile then
+			vim.cmd [[wa!]]
+		end
 		make_comp_window(cmd)
-	else
-		api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
 	end
-end
 
---- Export
-Compile = M
+	api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
+end
 
 return M
