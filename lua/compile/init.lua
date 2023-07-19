@@ -4,11 +4,17 @@ local api = vim.api
 local default_options = {
 	save_on_compile = false,
 	comp_window_height = 20,
-	language_commands = { },
 	bindings = {
 		build = '<C-c><C-b>',
 		run   = '<C-c><C-c>',
 		test  = '<C-c><C-t>',
+	},
+	language_commands = {
+		['odin'] = {
+			build = 'odin build .',
+			run = 'odin run .',
+			test = 'odin test .',
+		},
 	},
 }
 
@@ -18,15 +24,32 @@ local function keymap (mode, seq, cmd)
 	vim.keymap.set(mode, seq, cmd, {noremap = true, silent = true})
 end
 
-local function get_compile_cmd()
-	local buf_cmd = vim.b.compile_cmd
+local function get_compile_cmd(kind)
+	local ft = vim.bo.filetype
+
+	local buf_cmd = vim.b['compile_cmd_'..kind]
 	if buf_cmd then
 		return buf_cmd
 	end
-	local global_cmd = vim.g.compile_cmd
+
+	local lang = options.language_commands[ft]
+	if lang then
+		local lang_cmd = lang[kind]
+		if lang_cmd then
+			if type(lang_cmd) == 'function' then
+				local res = lang_cmd()
+				return res
+			else
+				return lang_cmd[kind]
+			end
+		end
+	end
+
+	local global_cmd = vim.g['compile_cmd_'..kind]
 	if global_cmd then
 		return global_cmd
 	end
+
 	return nil
 end
 
@@ -41,13 +64,13 @@ end
 local function apply_keymaps()
 	local binds = options.bindings
 	if binds.build then
-		keymap('n', binds.build, function() M.compile(0, get_compile_cmd()) end)
+		keymap('n', binds.build, function() M.compile(0, get_compile_cmd('build')) end)
 	end
 	if binds.run then
-		keymap('n', binds.run, function() M.compile(0, get_compile_cmd()) end)
+		keymap('n', binds.run, function() M.compile(0, get_compile_cmd('run')) end)
 	end
 	if binds.test then
-		keymap('n', binds.test, function() M.compile(0, get_compile_cmd()) end)
+		keymap('n', binds.test, function() M.compile(0, get_compile_cmd('test')) end)
 	end
 end
 
@@ -75,5 +98,8 @@ function M.compile(bufnum, cmd)
 		api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
 	end
 end
+
+--- Export
+Compile = M
 
 return M
