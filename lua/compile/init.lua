@@ -10,11 +10,6 @@ local default_options = {
 		test  = '<C-c><C-t>',
 	},
 	language_commands = {
-		['odin'] = {
-			build = 'odin build .',
-			run = 'odin run .',
-			test = 'odin test .',
-		},
 	},
 }
 
@@ -33,6 +28,8 @@ function M.get_compile_cmd(kind)
 	end
 
 	local lang = options.language_commands[ft]
+	api.nvim_notify(('lang is %s'):format(ft), vim.log.levels.ERROR, {})
+
 	if lang then
 		local lang_cmd = lang[kind]
 		if lang_cmd then
@@ -99,6 +96,7 @@ function M.setup(opts)
 	apply_keymaps()
 	--- Export
 	Compile = M
+	return Compile
 end
 
 return M
