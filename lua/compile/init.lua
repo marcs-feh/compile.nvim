@@ -13,7 +13,7 @@ local default_options = {
 	},
 }
 
-local options = {}
+M.options = {}
 
 local function keymap (mode, seq, cmd)
 	vim.keymap.set(mode, seq, cmd, {noremap = true, silent = true})
@@ -27,17 +27,15 @@ function M.get_compile_cmd(kind)
 		return buf_cmd
 	end
 
-	local lang = options.language_commands[ft]
-	api.nvim_notify(('lang is %s'):format(ft), vim.log.levels.ERROR, {})
+	local lang_commands = Compile.options.language_commands[ft]
 
-	if lang then
-		local lang_cmd = lang[kind]
+	if lang_commands then
+		local lang_cmd = lang_commands[kind]
 		if lang_cmd then
 			if type(lang_cmd) == 'function' then
-				local res = lang_cmd()
-				return res
+				return lang_cmd()
 			else
-				return lang_cmd[kind]
+				return lang_cmd
 			end
 		end
 	end
@@ -59,12 +57,15 @@ local function apply_defaults(opts)
 end
 
 local function apply_keymaps()
-	local binds = options.bindings
+	local binds = M.options.bindings
 	if binds.build then
 		keymap('n', binds.build, function() M.compile(M.get_compile_cmd('build')) end)
 	end
 	if binds.run then
-		keymap('n', binds.run, function() M.compile(M.get_compile_cmd('run')) end)
+		keymap('n', binds.run, function()
+			local cmd = M.get_compile_cmd('run')
+			M.compile(cmd)
+		end)
 	end
 	if binds.test then
 		keymap('n', binds.test, function() M.compile(M.get_compile_cmd('test')) end)
@@ -73,14 +74,14 @@ end
 
 local function make_comp_window(cmd)
 	vim.cmd [[topleft split]]
-	vim.cmd(('horizontal resize %d'):format(options.comp_window_height))
+	vim.cmd(('horizontal resize %d'):format(M.options.comp_window_height))
 	vim.cmd.terminal(cmd)
 	vim.cmd [[normal i]]
 end
 
 function M.compile(cmd)
 	if cmd then
-		if options.save_on_compile then
+		if M.options.save_on_compile then
 			vim.cmd [[wa!]]
 		end
 		make_comp_window(cmd)
@@ -92,11 +93,11 @@ end
 function M.setup(opts)
 	if type(opts) ~= 'table' then opts = {} end
 	apply_defaults(opts)
-	options = opts
+	M.options = opts
 	apply_keymaps()
 	--- Export
 	Compile = M
-	return Compile
+	-- return Compile
 end
 
 return M

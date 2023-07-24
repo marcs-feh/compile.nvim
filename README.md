@@ -39,16 +39,17 @@ following search order for its compile_command:
 3. Global: `g:compile_cmd_X='my command'` where `X` is either `run`, `build` or `test`
 
 ```lua
-local compile_c = function(sub_cmd)
+local get_comp_cmd_c = function(sub_cmd)
     local cmd = 'make'
     -- Use neovim's API to explore filesystem and discover
     -- the type of project, this is just a lua function feel
     -- free to do as you wish. Here we will assume a simple Makefile
     -- as an example
-    return ('%s %s'):format(cmd, sub_cmd)
+	cmd = ('%s %s'):format(cmd, sub_cmd)
+    return cmd
 end
 
-require 'compile'.setup{
+require 'compile'.setup {
     language_commands = {
         ['odin'] = {
             build = 'odin build .',
@@ -61,10 +62,10 @@ require 'compile'.setup{
             test = 'zig build test',
         },
         ['c'] = {
-            build = function() compile_c('all') end,
-            run = function() compile_c('run') end,
-            test = function() compile_c('test') end,
-        }
+            build = function() return get_comp_cmd_c('all') end,
+            run = function() return get_comp_cmd_c('run') end,
+            test = function() return get_comp_cmd_c('test') end,
+        },
     },
 }
 ```
