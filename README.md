@@ -5,6 +5,11 @@ This is quite similar to Emacs' `compile-mode` although much simpler.
 `compile.nvim` allows you to specify specific commands/lua functions to
 compile, run and test software in your favorite language.
 
+To learn more install the plugin and inspect its global table:
+```vim
+:lua print(vim.inspect(Compile))
+```
+
 ## Configuring
 
 ```lua
@@ -38,6 +43,8 @@ following search order for its compile_command:
 2. Plugin table: This is the `language_commands` table, this should be your preferred method of setting commands
 3. Global: `g:compile_cmd_X='my command'` where `X` is either `run`, `build` or `test`
 
+## Advanced Example
+
 ```lua
 local get_comp_cmd_c = function(sub_cmd)
     local cmd = 'make'
@@ -45,7 +52,7 @@ local get_comp_cmd_c = function(sub_cmd)
     -- the type of project, this is just a lua function feel
     -- free to do as you wish. Here we will assume a simple Makefile
     -- as an example
-	cmd = ('%s %s'):format(cmd, sub_cmd)
+    cmd = ('%s %s'):format(cmd, sub_cmd)
     return cmd
 end
 
@@ -70,4 +77,3 @@ require 'compile'.setup {
 }
 ```
 
-### Advanced example

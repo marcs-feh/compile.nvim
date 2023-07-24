@@ -45,6 +45,7 @@ function M.get_compile_cmd(kind)
 		return global_cmd
 	end
 
+	api.nvim_notify(("Could not find any compile command for action '%s'"):format(kind), vim.log.levels.ERROR, {})
 	return nil
 end
 
@@ -85,8 +86,6 @@ function M.compile(cmd)
 			vim.cmd [[wa!]]
 		end
 		make_comp_window(cmd)
-	else
-		api.nvim_notify('Could not find any compile_cmd', vim.log.levels.ERROR, {})
 	end
 end
 
