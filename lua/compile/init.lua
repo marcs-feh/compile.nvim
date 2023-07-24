@@ -27,7 +27,7 @@ function M.get_compile_cmd(kind)
 		return buf_cmd
 	end
 
-	local lang_commands = Compile.options.language_commands[ft]
+	local lang_commands = M.options.language_commands[ft]
 
 	if lang_commands then
 		local lang_cmd = lang_commands[kind]
@@ -96,7 +96,7 @@ function M.setup(opts)
 	apply_keymaps()
 	--- Export
 	Compile = M
-	-- return Compile
+	return M
 end
 
 return M
